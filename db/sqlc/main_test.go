@@ -1,12 +1,13 @@
 package db
 
 import (
-    "context"
-    "log"
-    "os"
-    "testing"
+	"context"
+	"log"
+	"os"
+	util "simplebank/utils"
+	"testing"
 
-    "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -17,8 +18,13 @@ var testQueries *Queries
 var testDB *pgxpool.Pool
 
 func TestMain(m *testing.M) {
+    config, fail := util.LoadConfig(".")
+	if fail != nil {
+		log.Fatal("cannot load config:", fail)
+	}
+
     var err error
-    testDB, err = pgxpool.New(context.Background(), dbSource)
+    testDB, err = pgxpool.New(context.Background(), config.DBSource)
     if err != nil {
         log.Fatal("cannot connect to db:", err)
     }

@@ -1,7 +1,33 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"log"
+	"simplebank/api"
+	db "simplebank/db/sqlc"
+	util "simplebank/utils"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+var conn *pgxpool.Pool
 
 func main() {
-	fmt.Println("First Landing Golang APP");
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	conn, err = pgxpool.New(context.Background(), config.DBSource)
+    if err != nil {
+        log.Fatal("cannot connect to db:", err)
+    }
+
+	store := db.NewStore(conn)
+	server := api.NewServer(store)
+
+	err = server.Start(config.ServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
 }
