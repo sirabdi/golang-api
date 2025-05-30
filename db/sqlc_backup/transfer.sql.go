@@ -7,10 +7,12 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTransfer = `-- name: CreateTransfer :one
-INSERT INTO transfers (
+INSERT INTO transfer (
   from_account_id, to_account_id, amount
 ) VALUES (
   $1, $2, $3
@@ -19,8 +21,8 @@ RETURNING id, from_account_id, to_account_id, amount, created_at
 `
 
 type CreateTransferParams struct {
-	FromAccountID int64
-	ToAccountID   int64
+	FromAccountID pgtype.Int8
+	ToAccountID   pgtype.Int8
 	Amount        int64
 }
 
@@ -38,7 +40,7 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 }
 
 const getTransfer = `-- name: GetTransfer :one
-SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
+SELECT id, from_account_id, to_account_id, amount, created_at FROM transfer
 WHERE id = $1 LIMIT 1
 `
 
@@ -56,7 +58,7 @@ func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 }
 
 const listTransfers = `-- name: ListTransfers :many
-SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
+SELECT id, from_account_id, to_account_id, amount, created_at FROM transfer
 ORDER BY id
 LIMIT $1
 OFFSET $2

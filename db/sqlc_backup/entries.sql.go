@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEntries = `-- name: CreateEntries :one
@@ -19,7 +21,7 @@ RETURNING id, account_id, amount, created_at
 `
 
 type CreateEntriesParams struct {
-	AccountID int64
+	AccountID pgtype.Int8
 	Amount    int64
 }
 
@@ -109,7 +111,7 @@ WHERE id = $1
 
 type UpdateEntriesParams struct {
 	ID        int64
-	AccountID int64
+	AccountID pgtype.Int8
 	Amount    int64
 }
 

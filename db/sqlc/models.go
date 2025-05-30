@@ -9,26 +9,43 @@ import (
 )
 
 type Account struct {
+	ID         int64
+	Owner      string
+	Balance    int64
+	ProfilePic pgtype.Text
+	Currency   string
+	CreatedAt  pgtype.Timestamptz
+}
+
+type Blog struct {
+	ID                 int64
+	Title              string
+	DescriptionArticle string
+	CategoryID         int64
+	AccountID          int64
+	CreatedAt          pgtype.Timestamptz
+}
+
+type BlogCategory struct {
 	ID        int64
-	Owner     string
-	Balance   int64
-	Currency  string
+	Name      string
+	Status    pgtype.Bool
 	CreatedAt pgtype.Timestamptz
 }
 
 type Entry struct {
 	ID        int64
-	AccountID pgtype.Int8
-	// can be negative or posivie value
+	AccountID int64
+	// Can be negative or positive value
 	Amount    int64
 	CreatedAt pgtype.Timestamptz
 }
 
 type Transfer struct {
 	ID            int64
-	FromAccountID pgtype.Int8
-	ToAccountID   pgtype.Int8
-	// must be positive
+	FromAccountID int64
+	ToAccountID   int64
+	// Must be positive
 	Amount    int64
 	CreatedAt pgtype.Timestamptz
 }
