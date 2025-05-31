@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func UploadBase64(ctx *gin.Context, n string) pgtype.Text {
+func UploadBase64(ctx *gin.Context, n string) string {
 	base64Data := n
 	if commaIdx := strings.Index(base64Data, ","); commaIdx != -1 {
 		base64Data = base64Data[commaIdx+1:]
@@ -33,5 +32,6 @@ func UploadBase64(ctx *gin.Context, n string) pgtype.Text {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot save image"})
 	}
 
-	return pgtype.Text{String: savePath, Valid: true}
+	return filepath.ToSlash(savePath)
+
 }
