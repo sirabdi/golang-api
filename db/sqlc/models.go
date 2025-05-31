@@ -9,12 +9,12 @@ import (
 )
 
 type Account struct {
-	ID         int64
-	Owner      string
-	Balance    int64
-	ProfilePic pgtype.Text
-	Currency   string
-	CreatedAt  pgtype.Timestamptz
+	ID             int64
+	Owner          string
+	Balance        int64
+	ProfilePicture pgtype.Text
+	Currency       string
+	CreatedAt      pgtype.Timestamptz
 }
 
 type Blog struct {
@@ -23,6 +23,7 @@ type Blog struct {
 	DescriptionArticle string
 	CategoryID         int64
 	AccountID          int64
+	BannerImage        pgtype.Text
 	CreatedAt          pgtype.Timestamptz
 }
 

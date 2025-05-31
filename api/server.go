@@ -25,6 +25,9 @@ func NewServer(store *db.Store) *Server {
 	// Blog
 	router.POST("/blog", server.createBlog)
 
+	// Blog Categories
+	router.POST("/blog-categories", server.createBlogCategories)
+
 	server.router = router
 	return server
 }

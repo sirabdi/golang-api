@@ -7,15 +7,17 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBlogs = `-- name: CreateBlogs :one
 INSERT INTO blogs (
-  title, description_article, category_id, account_id
+  title, description_article, category_id, account_id, banner_image
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3, $4, $5
 )
-RETURNING id, title, description_article, category_id, account_id, created_at
+RETURNING id, title, description_article, category_id, account_id, banner_image, created_at
 `
 
 type CreateBlogsParams struct {
@@ -23,6 +25,7 @@ type CreateBlogsParams struct {
 	DescriptionArticle string
 	CategoryID         int64
 	AccountID          int64
+	BannerImage        pgtype.Text
 }
 
 func (q *Queries) CreateBlogs(ctx context.Context, arg CreateBlogsParams) (Blog, error) {
@@ -31,6 +34,7 @@ func (q *Queries) CreateBlogs(ctx context.Context, arg CreateBlogsParams) (Blog,
 		arg.DescriptionArticle,
 		arg.CategoryID,
 		arg.AccountID,
+		arg.BannerImage,
 	)
 	var i Blog
 	err := row.Scan(
@@ -39,6 +43,7 @@ func (q *Queries) CreateBlogs(ctx context.Context, arg CreateBlogsParams) (Blog,
 		&i.DescriptionArticle,
 		&i.CategoryID,
 		&i.AccountID,
+		&i.BannerImage,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -55,7 +60,7 @@ func (q *Queries) DeleteBlogs(ctx context.Context, id int64) error {
 }
 
 const getBlogs = `-- name: GetBlogs :one
-SELECT id, title, description_article, category_id, account_id, created_at FROM blogs
+SELECT id, title, description_article, category_id, account_id, banner_image, created_at FROM blogs
 WHERE id = $1 LIMIT 1
 `
 
@@ -68,13 +73,14 @@ func (q *Queries) GetBlogs(ctx context.Context, id int64) (Blog, error) {
 		&i.DescriptionArticle,
 		&i.CategoryID,
 		&i.AccountID,
+		&i.BannerImage,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listBlogss = `-- name: ListBlogss :many
-SELECT id, title, description_article, category_id, account_id, created_at FROM blogs
+SELECT id, title, description_article, category_id, account_id, banner_image, created_at FROM blogs
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -100,6 +106,7 @@ func (q *Queries) ListBlogss(ctx context.Context, arg ListBlogssParams) ([]Blog,
 			&i.DescriptionArticle,
 			&i.CategoryID,
 			&i.AccountID,
+			&i.BannerImage,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -118,7 +125,8 @@ SET
   title = $2,
   description_article = $3,
   category_id = $4,
-  account_id = $5
+  account_id = $5,
+  banner_image = $6
 WHERE id = $1
 `
 
@@ -128,6 +136,7 @@ type UpdateBlogsParams struct {
 	DescriptionArticle string
 	CategoryID         int64
 	AccountID          int64
+	BannerImage        pgtype.Text
 }
 
 func (q *Queries) UpdateBlogs(ctx context.Context, arg UpdateBlogsParams) error {
@@ -137,6 +146,7 @@ func (q *Queries) UpdateBlogs(ctx context.Context, arg UpdateBlogsParams) error 
 		arg.DescriptionArticle,
 		arg.CategoryID,
 		arg.AccountID,
+		arg.BannerImage,
 	)
 	return err
 }

@@ -2,7 +2,7 @@ CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
   "owner" varchar NOT NULL,
   "balance" bigint NOT NULL,
-  "profile_pic" text,
+  "profile_picture" text,
   "currency" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
@@ -38,6 +38,7 @@ CREATE TABLE "blogs" (
   "description_article" varchar NOT NULL,
   "category_id" bigint NOT NULL,
   "account_id" bigint NOT NULL,
+   "banner_image" text,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   FOREIGN KEY ("category_id") REFERENCES "blog_categories" ("id"),
   FOREIGN KEY ("account_id") REFERENCES "accounts" ("id")

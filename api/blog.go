@@ -5,6 +5,7 @@ import (
 	db "simplebank/db/sqlc"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type createBlogRequest struct {
@@ -12,6 +13,7 @@ type createBlogRequest struct {
 	DescriptionArticle string `json:"description_article" binding:"required"`
 	CategoryID int64 `json:"category_id" binding:"required"`
 	AccountID int64 `json:"account_id" binding:"required"`
+	BannerImage string `json:"banner_image"`
 }
 
 
@@ -27,6 +29,7 @@ func (server *Server) createBlog(ctx *gin.Context) {
 		DescriptionArticle: req.DescriptionArticle,
 		CategoryID: req.CategoryID,
 		AccountID: req.AccountID,
+		BannerImage: pgtype.Text{String: req.BannerImage, Valid: req.BannerImage != ""},
 	}
 
 	blog, err := server.store.CreateBlogs(ctx, arg)

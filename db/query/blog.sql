@@ -1,8 +1,8 @@
 -- name: CreateBlogs :one
 INSERT INTO blogs (
-  title, description_article, category_id, account_id
+  title, description_article, category_id, account_id, banner_image
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3, $4, $5
 )
 RETURNING *;
 
@@ -22,7 +22,8 @@ SET
   title = $2,
   description_article = $3,
   category_id = $4,
-  account_id = $5
+  account_id = $5,
+  banner_image = $6
 WHERE id = $1;
 
 -- name: DeleteBlogs :exec

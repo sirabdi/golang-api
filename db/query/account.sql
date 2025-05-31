@@ -1,8 +1,8 @@
 -- name: CreateAccount :one
 INSERT INTO accounts (
-  owner, balance, currency
+  owner, balance, currency, profile_picture
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING *;
 
@@ -21,7 +21,8 @@ UPDATE accounts
 SET 
   owner = $2,
   balance = $3,
-  currency = $4
+  currency = $4,
+  profile_picture = $5
 WHERE id = $1;
 
 -- name: DeleteAccount :exec

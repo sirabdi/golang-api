@@ -7,31 +7,39 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO accounts (
-  owner, balance, currency
+  owner, balance, currency, profile_picture
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
-RETURNING id, owner, balance, profile_pic, currency, created_at
+RETURNING id, owner, balance, profile_picture, currency, created_at
 `
 
 type CreateAccountParams struct {
-	Owner    string
-	Balance  int64
-	Currency string
+	Owner          string
+	Balance        int64
+	Currency       string
+	ProfilePicture pgtype.Text
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRow(ctx, createAccount, arg.Owner, arg.Balance, arg.Currency)
+	row := q.db.QueryRow(ctx, createAccount,
+		arg.Owner,
+		arg.Balance,
+		arg.Currency,
+		arg.ProfilePicture,
+	)
 	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.Owner,
 		&i.Balance,
-		&i.ProfilePic,
+		&i.ProfilePicture,
 		&i.Currency,
 		&i.CreatedAt,
 	)
@@ -49,7 +57,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, owner, balance, profile_pic, currency, created_at FROM accounts
+SELECT id, owner, balance, profile_picture, currency, created_at FROM accounts
 WHERE id = $1 LIMIT 1
 `
 
@@ -60,7 +68,7 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 		&i.ID,
 		&i.Owner,
 		&i.Balance,
-		&i.ProfilePic,
+		&i.ProfilePicture,
 		&i.Currency,
 		&i.CreatedAt,
 	)
@@ -68,7 +76,7 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 }
 
 const listAccounts = `-- name: ListAccounts :many
-SELECT id, owner, balance, profile_pic, currency, created_at FROM accounts
+SELECT id, owner, balance, profile_picture, currency, created_at FROM accounts
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -92,7 +100,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 			&i.ID,
 			&i.Owner,
 			&i.Balance,
-			&i.ProfilePic,
+			&i.ProfilePicture,
 			&i.Currency,
 			&i.CreatedAt,
 		); err != nil {
@@ -111,15 +119,17 @@ UPDATE accounts
 SET 
   owner = $2,
   balance = $3,
-  currency = $4
+  currency = $4,
+  profile_picture = $5
 WHERE id = $1
 `
 
 type UpdateAccountParams struct {
-	ID       int64
-	Owner    string
-	Balance  int64
-	Currency string
+	ID             int64
+	Owner          string
+	Balance        int64
+	Currency       string
+	ProfilePicture pgtype.Text
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
@@ -128,6 +138,7 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) er
 		arg.Owner,
 		arg.Balance,
 		arg.Currency,
+		arg.ProfilePicture,
 	)
 	return err
 }
