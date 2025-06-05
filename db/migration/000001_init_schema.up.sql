@@ -1,5 +1,8 @@
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
+  "username" varchar(50) UNIQUE NOT NULL,
+  "password_hash" varchar(255) NOT NULL,
+  "role" varchar(50) NOT NULL DEFAULT 'user',
   "owner" varchar NOT NULL,
   "balance" bigint NOT NULL,
   "profile_picture" text,

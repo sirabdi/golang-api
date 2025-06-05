@@ -13,14 +13,17 @@ import (
 
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO accounts (
-  owner, balance, currency, profile_picture
+  username, password_hash, role, owner, balance, currency, profile_picture
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3, $4, $5, $6, $7
 )
-RETURNING id, owner, balance, profile_picture, currency, created_at
+RETURNING id, username, password_hash, role, owner, balance, profile_picture, currency, created_at
 `
 
 type CreateAccountParams struct {
+	Username       string
+	PasswordHash   string
+	Role           string
 	Owner          string
 	Balance        int64
 	Currency       string
@@ -29,6 +32,9 @@ type CreateAccountParams struct {
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
 	row := q.db.QueryRow(ctx, createAccount,
+		arg.Username,
+		arg.PasswordHash,
+		arg.Role,
 		arg.Owner,
 		arg.Balance,
 		arg.Currency,
@@ -37,6 +43,9 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	var i Account
 	err := row.Scan(
 		&i.ID,
+		&i.Username,
+		&i.PasswordHash,
+		&i.Role,
 		&i.Owner,
 		&i.Balance,
 		&i.ProfilePicture,
@@ -57,7 +66,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, owner, balance, profile_picture, currency, created_at FROM accounts
+SELECT id, username, password_hash, role, owner, balance, profile_picture, currency, created_at FROM accounts
 WHERE id = $1 LIMIT 1
 `
 
@@ -66,6 +75,9 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	var i Account
 	err := row.Scan(
 		&i.ID,
+		&i.Username,
+		&i.PasswordHash,
+		&i.Role,
 		&i.Owner,
 		&i.Balance,
 		&i.ProfilePicture,
@@ -76,7 +88,7 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 }
 
 const listAccounts = `-- name: ListAccounts :many
-SELECT id, owner, balance, profile_picture, currency, created_at FROM accounts
+SELECT id, username, password_hash, role, owner, balance, profile_picture, currency, created_at FROM accounts
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -98,6 +110,9 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 		var i Account
 		if err := rows.Scan(
 			&i.ID,
+			&i.Username,
+			&i.PasswordHash,
+			&i.Role,
 			&i.Owner,
 			&i.Balance,
 			&i.ProfilePicture,
@@ -117,15 +132,21 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 const updateAccount = `-- name: UpdateAccount :exec
 UPDATE accounts
 SET 
-  owner = $2,
-  balance = $3,
-  currency = $4,
-  profile_picture = $5
+  username = $2,
+  password_hash = $3,
+  role = $4,
+  owner = $5,
+  balance = $6,
+  currency = $7,
+  profile_picture = $8
 WHERE id = $1
 `
 
 type UpdateAccountParams struct {
 	ID             int64
+	Username       string
+	PasswordHash   string
+	Role           string
 	Owner          string
 	Balance        int64
 	Currency       string
@@ -135,6 +156,9 @@ type UpdateAccountParams struct {
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
 	_, err := q.db.Exec(ctx, updateAccount,
 		arg.ID,
+		arg.Username,
+		arg.PasswordHash,
+		arg.Role,
 		arg.Owner,
 		arg.Balance,
 		arg.Currency,

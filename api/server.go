@@ -2,6 +2,8 @@ package api
 
 import (
 	db "simplebank/db/sqlc"
+	"simplebank/handlers"
+	"simplebank/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +17,9 @@ func NewServer(store *db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 
+	router.POST("/login", handlers.Login)
+	router.POST("/refresh-token", handlers.RefreshToken)
+
 	// Account
 	router.POST("/accounts", server.createAccount)
 	router.GET("/account/:id", server.getAccount)
@@ -22,12 +27,19 @@ func NewServer(store *db.Store) *Server {
 	router.PUT("/account/:id", server.updateAccount)
 	router.DELETE("/account/:id", server.deleteAccount)
 
-	// Blog
-	router.POST("/blog", server.createBlog)
-	router.GET("/blog/:id", server.getBlog)
-	router.GET("/blogs", server.listBlogs)
-	router.PUT("/blog/:id", server.updateBlog)
-	router.DELETE("/blog/:id", server.deleteBlog)
+
+	// Protected routes (require authentication)
+    protectedRoutes := router.Group("/")
+    protectedRoutes.Use(middleware.AuthenticationMiddleware())
+    {
+		// Protected routes here
+		// Blog
+		protectedRoutes.POST("/blog", server.createBlog)
+		protectedRoutes.GET("/blog/:id", server.getBlog)
+		protectedRoutes.GET("/blogs", server.listBlogs)
+		protectedRoutes.PUT("/blog/:id", server.updateBlog)
+		protectedRoutes.DELETE("/blog/:id", server.deleteBlog)
+	}
 
 	// Blog Categories
 	router.POST("/blog-category", server.createBlogCategories)

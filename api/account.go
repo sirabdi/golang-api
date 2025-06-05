@@ -9,11 +9,14 @@ import (
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Username    	string `json:"username" binding:"required"`
+	PasswordHash 	string `json:"password" binding:"required"`
+	Owner    		string `json:"owner" binding:"required"`
+	Currency 		string `json:"currency" binding:"required,oneof=USD EUR"`
 }
 
 type updateAccountRequest struct {
+	Username    	string `json:"username"`
 	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
 }
@@ -36,6 +39,8 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	}
 
 	arg := db.CreateAccountParams{
+		Username: req.Username,
+		PasswordHash: req.PasswordHash,
 		Owner: req.Owner,
 		Currency: req.Currency,
 		Balance: 0,
@@ -107,6 +112,7 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 
 	arg := db.UpdateAccountParams{
 		ID:      uriReq.ID,
+		Username: jsonReq.Username,
 		Owner:   jsonReq.Owner,
 		Currency:   jsonReq.Currency,
 	}
