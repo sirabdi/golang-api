@@ -6,6 +6,7 @@ import (
 	db "simplebank/db/sqlc"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type createAccountRequest struct {
@@ -38,9 +39,15 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
 	arg := db.CreateAccountParams{
 		Username: req.Username,
-		PasswordHash: req.PasswordHash,
+		PasswordHash: string(hashedPassword),
 		Owner: req.Owner,
 		Currency: req.Currency,
 		Balance: 0,

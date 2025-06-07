@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,6 +14,7 @@ var secretKey = []byte("secretpassword")
 func GenerateAccessToken(userID int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["user_id"] = userID
+	claims["type"] = "access"
 	// Access token valid for 60 seconds as requested
 	claims["exp"] = time.Now().Add(time.Second * 60).Unix()
 
@@ -24,6 +26,7 @@ func GenerateAccessToken(userID int64) (string, error) {
 func GenerateRefreshToken(userID int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["user_id"] = userID
+	claims["type"] = "refresh"
 	// Refresh token valid for a longer period, e.g., 7 days (or 60 seconds for this example)
 	// For this example, we'll also set it to 60 seconds as per your request,
 	// but in a real app, this would be much longer than the access token.
@@ -35,25 +38,21 @@ func GenerateRefreshToken(userID int64) (string, error) {
 
 // VerifyToken verifies a token JWT validate 
 func VerifyToken(tokenString string) (jwt.MapClaims, error) {
-    // Parse the token
-    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-        // Check the signing method
-        if token.Method != jwt.SigningMethodHS256 {
-            return nil, fmt.Errorf("invalid signing method: %v", token.Header["alg"])
-        }
+	fmt.Println("tokenString ", tokenString)
 
-        return secretKey, nil
+    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+        return []byte("secretpassword"), nil
     })
 
-    // Check for errors
+	fmt.Println("token ", token)
+    
     if err != nil {
         return nil, err
     }
-
-    // Validate the token
+    
     if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
         return claims, nil
     }
-
-    return nil, fmt.Errorf("Invalid token")
+    
+    return nil, errors.New("invalid token")
 }

@@ -17,7 +17,7 @@ func NewServer(store *db.Store) *Server {
 	router := gin.Default()
 
 	router.POST("/login", server.loginAuth)
-	// router.POST("/refresh-token", handlers.RefreshToken)
+	router.POST("/refresh-token", server.refreshAuth)
 
 	// Account
 	router.POST("/accounts", server.createAccount)
