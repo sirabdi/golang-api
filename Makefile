@@ -7,8 +7,14 @@ DB_PORT ?= 5432
 createdb:
 	@powershell -Command "$$env:PGPASSWORD='$(DB_PASSWORD)'; createdb -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) $(DB_NAME)"
 
+createdbmacos:
+	PGPASSWORD='$(DB_PASSWORD)' createdb -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) $(DB_NAME)
+
 dropdb:
 	@powershell -Command "$$env:PGPASSWORD='$(DB_PASSWORD)'; dropdb -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) $(DB_NAME)"
+
+dropdbmacos:
+	PGPASSWORD='$(DB_PASSWORD)' dropdb -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) $(DB_NAME)
 
 migrateup:
 	migrate -path db/migration -database "postgresql://postgres:admin@localhost:5432/simple_bank?sslmode=disable" -verbose up
@@ -25,4 +31,4 @@ test:
 server:
 	go run main.go
 
-.PHONY: createdb dropdb sqlc test migrateup migratedown
+.PHONY: createdb createdbmacos dropdb dropdbmacos sqlc test migrateup migratedown

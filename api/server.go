@@ -2,7 +2,6 @@ package api
 
 import (
 	db "simplebank/db/sqlc"
-	"simplebank/handlers"
 	"simplebank/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -17,8 +16,8 @@ func NewServer(store *db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 
-	router.POST("/login", handlers.Login)
-	router.POST("/refresh-token", handlers.RefreshToken)
+	router.POST("/login", server.loginAuth)
+	// router.POST("/refresh-token", handlers.RefreshToken)
 
 	// Account
 	router.POST("/accounts", server.createAccount)

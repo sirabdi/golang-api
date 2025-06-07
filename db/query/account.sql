@@ -16,6 +16,10 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
+-- name: GetAccountByUsername :one
+SELECT * FROM accounts
+WHERE username = $1 LIMIT 1;
+
 -- name: UpdateAccount :exec
 UPDATE accounts
 SET 
