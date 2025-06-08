@@ -10,6 +10,14 @@ CREATE TABLE "accounts" (
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE "refresh_token" (
+  "id" bigserial PRIMARY KEY,
+  "account_id" bigint NOT NULL,
+  "token_refresh" varchar(255) NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT now(),
+  FOREIGN KEY ("account_id") REFERENCES "accounts" ("id")
+);
+
 CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
   "account_id" bigint NOT NULL,
@@ -50,6 +58,7 @@ CREATE TABLE "blogs" (
 -- Indexes
 CREATE INDEX ON "accounts" ("owner");
 CREATE INDEX ON "entries" ("account_id");
+CREATE INDEX ON "refresh_token" ("account_id");
 CREATE INDEX ON "transfers" ("from_account_id");
 CREATE INDEX ON "transfers" ("to_account_id");
 CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");

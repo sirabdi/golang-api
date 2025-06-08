@@ -45,6 +45,13 @@ type Entry struct {
 	CreatedAt pgtype.Timestamptz
 }
 
+type RefreshToken struct {
+	ID           int64
+	AccountID    int64
+	TokenRefresh string
+	CreatedAt    pgtype.Timestamptz
+}
+
 type Transfer struct {
 	ID            int64
 	FromAccountID int64

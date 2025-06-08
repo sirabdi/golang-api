@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	db "simplebank/db/sqlc"
 	util "simplebank/utils"
 
 	"github.com/gin-gonic/gin"
@@ -52,6 +53,16 @@ func (server *Server) loginAuth(ctx *gin.Context) {
 		return
 	}
 
+	arg := db.CreateRefreshTokenParams{
+		AccountID: user.ID,
+		TokenRefresh: refreshToken,
+	}
+
+	if _, err := server.store.CreateRefreshToken(ctx, arg); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	// Respond with success message and token
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -97,7 +108,19 @@ func (server *Server) refreshAuth(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id in refresh token"})
 		return // ISSUE 7: Missing return statement
 	}
+
 	userID := int64(userIDFloat)
+
+	if _, err := server.store.GetRefreshToken(ctx, userID); err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+	
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 
 	// Generate new access token
 	token, err := util.GenerateAccessToken(userID)
@@ -110,6 +133,16 @@ func (server *Server) refreshAuth(ctx *gin.Context) {
 	refreshToken, err := util.GenerateRefreshToken(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token", "details": err.Error()})
+		return
+	}
+
+	arg := db.CreateRefreshTokenParams{
+		AccountID: userID,
+		TokenRefresh: refreshToken,
+	}
+
+	if _, err := server.store.CreateRefreshToken(ctx, arg); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
