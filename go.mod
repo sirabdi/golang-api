@@ -5,6 +5,7 @@ go 1.24.3
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.1
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0

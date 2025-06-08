@@ -111,13 +111,31 @@ func (server *Server) refreshAuth(ctx *gin.Context) {
 
 	userID := int64(userIDFloat)
 
-	if _, err := server.store.GetRefreshToken(ctx, userID); err != nil {
+	refreshTokenDetail, err := server.store.GetRefreshToken(ctx, userID)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-	
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	
+	if refreshTokenDetail.TokenRefresh == req.RefreshToken {
+		// Valid refresh token - proceed with cleanup and regeneration
+		err := server.store.DeleteRefreshToken(ctx, userID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				ctx.JSON(http.StatusNotFound, errorResponse(err))
+				return
+			}
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	} else {
+		// Token mismatch - reject the request or ignore deletion
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
 		return
 	}
 
